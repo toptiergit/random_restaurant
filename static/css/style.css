@@ -1,5 +1,6 @@
 body {
-    background-color: #f8f9fa;
+    background-color: #f0f2f5;
+    color: #1c1e21;
     font-family: 'Prompt', sans-serif;
 }
 
@@ -8,30 +9,43 @@ body {
     padding: 20px;
 }
 
+.navbar {
+    background-color: #ffffff !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.navbar-brand {
+    color: #1877f2 !important;
+    font-weight: bold;
+}
+
 .card {
+    border-radius: 8px;
     border: none;
-    border-radius: 15px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    background-color: white;
     transition: transform 0.2s;
 }
 
 .card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-2px);
 }
 
 .btn-primary {
-    background-color: #4CAF50;
-    border: none;
-    padding: 10px 25px;
-    border-radius: 25px;
+    background-color: #1877f2 !important;
+    border-color: #1877f2 !important;
+    border-radius: 6px;
     font-weight: 500;
-    transition: all 0.3s;
 }
 
 .btn-primary:hover {
-    background-color: #45a049;
-    transform: scale(1.05);
+    background-color: #166fe5 !important;
+    border-color: #166fe5 !important;
+}
+
+.form-control:focus {
+    border-color: #1877f2;
+    box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.2);
 }
 
 .history-item {
@@ -54,6 +68,7 @@ body {
     text-align: center;
     padding: 20px;
     display: none;
+    transition: opacity 0.3s ease-out;
 }
 
 .result-text {
@@ -72,10 +87,11 @@ body {
 }
 
 .btn-outline-secondary {
-    border-radius: 20px;
+    border-radius: 6px;
     font-size: 0.9rem;
     padding: 8px 15px;
     transition: all 0.3s;
+    font-weight: 500;
 }
 
 .btn-outline-secondary:hover {
@@ -86,10 +102,11 @@ body {
 
 /* เพิ่ม style สำหรับหน้า manage */
 .btn-outline-primary {
-    border-radius: 20px;
+    border-radius: 6px;
     font-size: 0.9rem;
     padding: 8px 15px;
     transition: all 0.3s;
+    font-weight: 500;
 }
 
 .btn-outline-primary:hover {
@@ -98,19 +115,19 @@ body {
 
 .list-group-item {
     border: none;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #f0f2f5;
     margin-bottom: 5px;
     border-radius: 8px !important;
-    transition: all 0.2s;
+    transition: all 0.3s ease-out;
 }
 
 .list-group-item:hover {
-    background-color: #f8f9fa;
+    background-color: #f0f2f5;
 }
 
 .btn-danger {
-    border-radius: 15px;
-    transition: all 0.2s;
+    background-color: #dc3545;
+    border-radius: 6px;
 }
 
 .btn-danger:hover {
@@ -118,6 +135,42 @@ body {
 }
 
 .card-title {
-    color: #4CAF50 !important;
-    font-weight: 500;
+    color: #1c1e21 !important;
+    font-weight: 600;
+}
+
+.input-group .btn {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.input-group .form-control {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.btn-outline-danger {
+    border-color: transparent;
+}
+
+.btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: white;
+    border-color: #dc3545;
+}
+
+/* เพิ่ม animation สำหรับรายการประวัติใหม่ */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.list-group-item:first-child {
+    animation: slideIn 0.3s ease-out;
 } 

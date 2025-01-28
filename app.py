@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, redirect, url_for
 from datetime import datetime
 import json
 import random
@@ -94,40 +94,71 @@ def random_restaurant():
 
 @app.route('/manage')
 def manage():
+    # นับจำนวนร้านในแต่ละประเภท
+    restaurant_counts = {category: len(restaurants) 
+                        for category, restaurants in manager.restaurant_categories.items()}
+    
     return render_template('manage.html', 
-                         categories=manager.restaurant_categories)
+                         categories=manager.restaurant_categories.keys(),
+                         restaurants=manager.restaurant_categories,
+                         restaurant_counts=restaurant_counts)
 
-@app.route('/api/restaurant', methods=['POST'])
+@app.route('/add', methods=['POST'])
 def add_restaurant():
-    data = request.get_json()
-    category = data.get('category')
-    restaurant = data.get('restaurant')
+    name = request.form.get('name')
+    category = request.form.get('category')
     
-    if category not in manager.restaurant_categories:
-        manager.restaurant_categories[category] = []
+    if name and category:
+        # ถ้ายังไม่มีหมวดหมู่นี้ ให้สร้างใหม่
+        if category not in manager.restaurant_categories:
+            manager.restaurant_categories[category] = []
+        
+        # เพิ่มร้านอาหารถ้ายังไม่มีในหมวดหมู่
+        if name not in manager.restaurant_categories[category]:
+            manager.restaurant_categories[category].append(name)
+            manager.save_restaurants()
     
-    if restaurant not in manager.restaurant_categories[category]:
-        manager.restaurant_categories[category].append(restaurant)
-        manager.save_restaurants()
-        return jsonify({'success': True})
-    
-    return jsonify({'error': 'ร้านอาหารนี้มีอยู่แล้ว'})
+    return redirect(url_for('manage'))
 
-@app.route('/api/restaurant', methods=['DELETE'])
+@app.route('/delete', methods=['POST'])
 def delete_restaurant():
-    data = request.get_json()
-    category = data.get('category')
-    restaurant = data.get('restaurant')
+    name = request.form.get('name')
+    category = request.form.get('category')  # เพิ่ม category ในการลบ
     
-    if (category in manager.restaurant_categories and 
-        restaurant in manager.restaurant_categories[category]):
-        manager.restaurant_categories[category].remove(restaurant)
-        if not manager.restaurant_categories[category]:
+    if name and category:
+        if category in manager.restaurant_categories:
+            if name in manager.restaurant_categories[category]:
+                manager.restaurant_categories[category].remove(name)
+                # ถ้าไม่มีร้านอาหารในหมวดหมู่แล้ว ให้ลบหมวดหมู่ออก
+                if not manager.restaurant_categories[category]:
+                    del manager.restaurant_categories[category]
+                manager.save_restaurants()
+    
+    return redirect(url_for('manage'))
+
+@app.route('/add_category', methods=['POST'])
+def add_category():
+    category = request.form.get('category')
+    
+    if category:
+        # ตรวจสอบว่าประเภทนี้มีอยู่แล้วหรือไม่
+        if category not in manager.restaurant_categories:
+            manager.restaurant_categories[category] = []
+            manager.save_restaurants()
+    
+    return redirect(url_for('manage'))
+
+@app.route('/delete_category', methods=['POST'])
+def delete_category():
+    category = request.form.get('category')
+    
+    if category:
+        # ลบประเภทอาหารและร้านอาหารทั้งหมดในประเภทนั้น
+        if category in manager.restaurant_categories:
             del manager.restaurant_categories[category]
-        manager.save_restaurants()
-        return jsonify({'success': True})
+            manager.save_restaurants()
     
-    return jsonify({'error': 'ไม่พบร้านอาหารที่ต้องการลบ'})
+    return redirect(url_for('manage'))
 
 if __name__ == '__main__':
     # เปลี่ยนจาก debug mode เป็น production mode

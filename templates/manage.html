@@ -4,187 +4,109 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>จัดการร้านอาหาร</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card mt-5">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h1 class="mb-0">🏪 จัดการร้านอาหาร</h1>
-                            <a href="/" class="btn btn-outline-primary">
-                                🏠 กลับหน้าหลัก
-                            </a>
-                        </div>
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container">
+            <a class="navbar-brand" href="/">🍽️ สุ่มร้านอาหาร</a>
+            <div class="d-flex">
+                <button class="btn btn-outline-primary me-2" data-bs-toggle="modal" data-bs-target="#categoryModal">
+                    จัดการประเภท
+                </button>
+                <a href="/" class="btn btn-primary">หน้าหลัก</a>
+            </div>
+        </div>
+    </nav>
 
-                        <div class="add-form mb-4">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h3 class="card-title mb-3">➕ เพิ่มร้านอาหารใหม่</h3>
-                                    <form id="addForm" class="row g-3">
-                                        <div class="col-md-5">
-                                            <input type="text" id="category" class="form-control" placeholder="หมวดหมู่" required>
-                                        </div>
-                                        <div class="col-md-5">
-                                            <input type="text" id="restaurant" class="form-control" placeholder="ชื่อร้านอาหาร" required>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <button type="submit" class="btn btn-success w-100">เพิ่ม</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
+    <!-- Modal จัดการประเภทอาหาร -->
+    <div class="modal fade" id="categoryModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">จัดการประเภทอาหาร</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="/add_category" method="POST" class="mb-4">
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="category" placeholder="ชื่อประเภทอาหารใหม่" required>
+                            <button type="submit" class="btn btn-primary">เพิ่ม</button>
                         </div>
+                    </form>
 
-                        <div class="restaurant-list">
-                            <h3 class="mb-3">📋 รายการร้านอาหาร</h3>
-                            {% for category, restaurants in categories.items() %}
-                            <div class="card mb-3">
-                                <div class="card-body">
-                                    <h5 class="card-title text-primary">{{ category }}</h5>
-                                    <div class="list-group">
-                                        {% for restaurant in restaurants %}
-                                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                                            {{ restaurant }}
-                                            <button class="btn btn-danger btn-sm delete-btn" 
-                                                    data-category="{{ category }}" 
-                                                    data-restaurant="{{ restaurant }}">
-                                                ลบ
-                                            </button>
-                                        </div>
-                                        {% endfor %}
-                                    </div>
-                                </div>
+                    <div class="list-group">
+                        {% for category in categories %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-light text-dark me-2">{{ restaurant_counts[category] }}</span>
+                                {{ category }}
                             </div>
-                            {% endfor %}
+                            <form action="/delete_category" method="POST" class="d-inline">
+                                <input type="hidden" name="category" value="{{ category }}">
+                                <button type="submit" class="btn btn-outline-danger btn-sm" 
+                                        onclick="return confirm('ยืนยันการลบประเภท {{ category }}?')">
+                                    ลบ
+                                </button>
+                            </form>
                         </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // เพิ่มฟังก์ชันสำหรับแนบ event listener ให้กับปุ่มลบ
-        function attachDeleteListeners() {
-            document.querySelectorAll('.delete-btn').forEach(button => {
-                // ลบ event listener เก่าออกก่อน (ถ้ามี) เพื่อป้องกันการทำงานซ้ำ
-                button.replaceWith(button.cloneNode(true));
-                
-                // เพิ่ม event listener ใหม่
-                document.querySelector(`[data-category="${button.dataset.category}"][data-restaurant="${button.dataset.restaurant}"]`)
-                    .addEventListener('click', async () => {
-                        if (!confirm('คุณแน่ใจหรือไม่ที่จะลบร้านอาหารนี้?')) return;
-
-                        const category = button.dataset.category;
-                        const restaurant = button.dataset.restaurant;
-
-                        try {
-                            const response = await fetch('/api/restaurant', {
-                                method: 'DELETE',
-                                body: new FormData([['category', category], ['restaurant', restaurant]])
-                            });
-                            const data = await response.json();
-                            
-                            if (data.error) {
-                                alert(data.error);
-                                return;
-                            }
-                            
-                            // ลบ element ของร้านอาหารออกโดยตรง
-                            const restaurantElement = button.closest('.list-group-item');
-                            restaurantElement.remove();
-                            
-                            // ถ้าไม่มีร้านอาหารเหลือในหมวดหมู่ ให้ลบการ์ดของหมวดหมู่ออก
-                            const categoryCard = button.closest('.card');
-                            if (categoryCard.querySelectorAll('.list-group-item').length === 0) {
-                                categoryCard.remove();
-                            }
-                        } catch (error) {
-                            console.error('Error:', error);
-                            alert('เกิดข้อผิดพลาดในการลบร้านอาหาร');
-                        }
-                    });
-            });
-        }
-
-        // เรียกใช้ฟังก์ชันตั้งแต่โหลดหน้า
-        attachDeleteListeners();
-
-        document.getElementById('addForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const category = document.getElementById('category').value;
-            const restaurant = document.getElementById('restaurant').value;
-
-            try {
-                const formData = new FormData();
-                formData.append('category', category);
-                formData.append('restaurant', restaurant);
-
-                const response = await fetch('/api/restaurant', {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await response.json();
-                
-                if (data.error) {
-                    alert(data.error);
-                    return;
-                }
-
-                // สร้าง element ใหม่สำหรับร้านอาหารที่เพิ่มเข้ามา
-                let categoryCard = document.querySelector(`.card-title.text-primary:contains("${category}")`);
-                
-                if (!categoryCard) {
-                    // ถ้ายังไม่มีหมวดหมู่นี้ ให้สร้างการ์ดใหม่
-                    const newCategoryHtml = `
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                <h5 class="card-title text-primary">${category}</h5>
-                                <div class="list-group">
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    document.querySelector('.restaurant-list').insertAdjacentHTML('beforeend', newCategoryHtml);
-                    categoryCard = document.querySelector(`.card-title.text-primary:contains("${category}")`);
-                }
-
-                // เพิ่มร้านอาหารใหม่เข้าไปในรายการ
-                const newRestaurantHtml = `
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                        ${restaurant}
-                        <button class="btn btn-danger btn-sm delete-btn" 
-                                data-category="${category}" 
-                                data-restaurant="${restaurant}">
-                            ลบ
-                        </button>
+    <div class="container mt-4">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-3">เพิ่มร้านอาหาร</h5>
+                <form action="/add" method="POST">
+                    <div class="mb-3">
+                        <input type="text" class="form-control" name="name" placeholder="ชื่อร้านอาหาร" required>
                     </div>
-                `;
-                categoryCard.closest('.card').querySelector('.list-group').insertAdjacentHTML('beforeend', newRestaurantHtml);
+                    <div class="mb-3">
+                        <select class="form-select" name="category" required>
+                            <option value="" disabled selected>เลือกประเภทอาหาร</option>
+                            {% for category in categories %}
+                            <option value="{{ category }}">{{ category }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">เพิ่มร้านอาหาร</button>
+                </form>
+            </div>
+        </div>
 
-                // แนบ event listener ให้กับปุ่มลบทั้งหมดอีกครั้ง
-                attachDeleteListeners();
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-3">รายชื่อร้านอาหารทั้งหมด</h5>
+                {% for category, restaurant_list in restaurants.items() %}
+                <div class="mb-4">
+                    <h6 class="mb-2">{{ category }}</h6>
+                    <div class="list-group">
+                        {% for restaurant in restaurant_list %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>{{ restaurant }}</div>
+                            <form action="/delete" method="POST" class="d-inline">
+                                <input type="hidden" name="name" value="{{ restaurant }}">
+                                <input type="hidden" name="category" value="{{ category }}">
+                                <button type="submit" class="btn btn-danger btn-sm" 
+                                        onclick="return confirm('ยืนยันการลบร้าน {{ restaurant }}?')">
+                                    ลบ
+                                </button>
+                            </form>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
 
-                // ล้างฟอร์ม
-                document.getElementById('category').value = '';
-                document.getElementById('restaurant').value = '';
-            } catch (error) {
-                console.error('Error:', error);
-                alert('เกิดข้อผิดพลาดในการเพิ่มร้านอาหาร');
-            }
-        });
-
-        // เพิ่ม polyfill สำหรับ :contains selector
-        jQuery.expr[':'].contains = function(a, i, m) {
-            return jQuery(a).text().toUpperCase()
-                .indexOf(m[3].toUpperCase()) >= 0;
-        };
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html> 
