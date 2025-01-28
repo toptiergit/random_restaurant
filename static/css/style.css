@@ -1,0 +1,123 @@
+body {
+    background-color: #f8f9fa;
+    font-family: 'Prompt', sans-serif;
+}
+
+.container {
+    max-width: 800px;
+    padding: 20px;
+}
+
+.card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.btn-primary {
+    background-color: #4CAF50;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 25px;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.btn-primary:hover {
+    background-color: #45a049;
+    transform: scale(1.05);
+}
+
+.history-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.2s;
+}
+
+.history-item:hover {
+    background-color: #f8f9fa;
+}
+
+.category-select {
+    border-radius: 10px;
+    padding: 10px;
+    border: 2px solid #ddd;
+}
+
+.result-container {
+    text-align: center;
+    padding: 20px;
+    display: none;
+}
+
+.result-text {
+    font-size: 24px;
+    color: #4CAF50;
+    margin: 20px 0;
+}
+
+.animate-result {
+    animation: popIn 0.5s ease-out;
+}
+
+@keyframes popIn {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.btn-outline-secondary {
+    border-radius: 20px;
+    font-size: 0.9rem;
+    padding: 8px 15px;
+    transition: all 0.3s;
+}
+
+.btn-outline-secondary:hover {
+    transform: scale(1.05);
+    background-color: #6c757d;
+    color: white;
+}
+
+/* เพิ่ม style สำหรับหน้า manage */
+.btn-outline-primary {
+    border-radius: 20px;
+    font-size: 0.9rem;
+    padding: 8px 15px;
+    transition: all 0.3s;
+}
+
+.btn-outline-primary:hover {
+    transform: scale(1.05);
+}
+
+.list-group-item {
+    border: none;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 5px;
+    border-radius: 8px !important;
+    transition: all 0.2s;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+}
+
+.btn-danger {
+    border-radius: 15px;
+    transition: all 0.2s;
+}
+
+.btn-danger:hover {
+    transform: scale(1.05);
+}
+
+.card-title {
+    color: #4CAF50 !important;
+    font-weight: 500;
+} 

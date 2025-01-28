@@ -1,85 +1,127 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
-    <title>สุ่มร้านอาหาร</title>
     <meta charset="UTF-8">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สุ่มร้านอาหาร</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
 </head>
 <body>
-    <div class="container mt-5">
-        <h1 class="mb-4">สุ่มร้านอาหาร</h1>
-        
-        <div class="row">
-            <div class="col-md-6">
-                <form id="randomForm" class="mb-4">
-                    <div class="mb-3">
-                        <label class="form-label">เลือกประเภทอาหาร:</label>
-                        <select class="form-select" name="category">
-                            <option value="ทั้งหมด">ทั้งหมด</option>
-                            {% for category in categories %}
-                            <option value="{{ category }}">{{ category }}</option>
-                            {% endfor %}
-                        </select>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card mt-5">
+                    <div class="card-body text-center">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h1 class="mb-0">🍽️ สุ่มร้านอาหาร</h1>
+                            <a href="/manage" class="btn btn-outline-secondary">
+                                ⚙️ จัดการร้านอาหาร
+                            </a>
+                        </div>
+                        <form id="randomForm" class="mb-4">
+                            <div class="mb-3">
+                                <select name="category" class="form-select category-select">
+                                    <option value="ทั้งหมด">ทั้งหมด</option>
+                                    {% for category in categories %}
+                                    <option value="{{ category }}">{{ category }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                🎲 สุ่มร้านอาหาร
+                            </button>
+                        </form>
+                        
+                        <div id="result" class="result-container">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h3 class="result-text"></h3>
+                                    <p class="text-muted category-text"></p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <button type="submit" class="btn btn-primary">สุ่มร้านอาหาร</button>
-                </form>
+                </div>
 
-                <div id="result" class="alert alert-success d-none"></div>
-            </div>
-            
-            <div class="col-md-6">
                 <div class="card">
-                    <div class="card-header">
-                        ประวัติการสุ่ม
-                    </div>
                     <div class="card-body">
-                        <ul id="history" class="list-group">
-                            {% for entry in history %}
-                            <li class="list-group-item">
-                                {{ entry.restaurant }} ({{ entry.category }})
-                                <br>
-                                <small class="text-muted">{{ entry.timestamp }}</small>
-                            </li>
+                        <h3 class="mb-3">📜 ประวัติการสุ่ม</h3>
+                        <div id="history">
+                            {% for item in history %}
+                            <div class="history-item">
+                                <strong>{{ item.restaurant }}</strong>
+                                <span class="text-muted">({{ item.category }})</span>
+                                <small class="float-end text-muted">{{ item.timestamp }}</small>
+                            </div>
                             {% endfor %}
-                        </ul>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <div class="mt-4">
-            <a href="/manage" class="btn btn-secondary">จัดการร้านอาหาร</a>
-        </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        $(document).ready(function() {
-            $('#randomForm').on('submit', function(e) {
-                e.preventDefault();
-                
-                $.ajax({
-                    url: '/random',
+        document.getElementById('randomForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            
+            try {
+                const response = await fetch('/random', {
                     method: 'POST',
-                    data: $(this).serialize(),
-                    success: function(response) {
-                        $('#result')
-                            .removeClass('d-none')
-                            .html(`วันนี้ไปกินที่: ${response.restaurant}<br>
-                                  ประเภท: ${response.category}<br>
-                                  เวลา: ${response.timestamp}`);
-                                  
-                        // อัพเดทประวัติ
-                        $('#history').prepend(`
-                            <li class="list-group-item">
-                                ${response.restaurant} (${response.category})
-                                <br>
-                                <small class="text-muted">${response.timestamp}</small>
-                            </li>
-                        `);
-                    }
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        category: form.category.value
+                    })
                 });
-            });
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                const resultContainer = document.getElementById('result');
+                resultContainer.style.display = 'block';
+                resultContainer.querySelector('.result-text').textContent = data.restaurant;
+                resultContainer.querySelector('.category-text').textContent = data.category;
+                
+                // อัพเดทประวัติ
+                const historyDiv = document.getElementById('history');
+                const newHistoryItem = document.createElement('div');
+                newHistoryItem.className = 'history-item animate-result';
+                newHistoryItem.dataset.timestamp = Date.now(); // เพิ่ม timestamp เพื่อเรียงลำดับ
+                newHistoryItem.innerHTML = `
+                    <strong>${data.restaurant}</strong>
+                    <span class="text-muted">(${data.category})</span>
+                    <small class="float-end text-muted">${data.timestamp}</small>
+                `;
+
+                // เพิ่มรายการใหม่ไว้ด้านบนสุด
+                if (historyDiv.firstChild) {
+                    historyDiv.insertBefore(newHistoryItem, historyDiv.firstChild);
+                } else {
+                    historyDiv.appendChild(newHistoryItem);
+                }
+                
+                // จัดการรายการประวัติให้แสดงแค่ 5 รายการล่าสุด
+                const historyItems = Array.from(historyDiv.children);
+                if (historyItems.length > 5) {
+                    // เรียงลำดับตาม timestamp และลบรายการเก่าที่เกิน
+                    historyItems
+                        .sort((a, b) => b.dataset.timestamp - a.dataset.timestamp)
+                        .slice(5)
+                        .forEach(item => item.remove());
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('เกิดข้อผิดพลาดในการสุ่มร้านอาหาร');
+            }
         });
     </script>
 </body>
