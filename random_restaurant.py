@@ -252,8 +252,11 @@ class RestaurantRandomizer:
         else:
             available_restaurants = self.restaurant_manager.restaurant_categories[category]
 
-        # กรองร้านที่เพิ่งถูกเลือกออก
-        filtered_restaurants = [r for r in available_restaurants if r not in self.history[:2]]
+        # กรองร้านที่เพิ่งถูกเลือกออก โดยตรวจสอบจากชื่อร้านในประวัติล่าสุด
+        filtered_restaurants = [
+            r for r in available_restaurants
+            if not any(entry["restaurant"] == r for entry in self.history[:2])
+        ]
         
         if not filtered_restaurants:
             filtered_restaurants = available_restaurants
